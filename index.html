@@ -10,61 +10,178 @@
   </head>
   <body>
     <canvas width=400 height=400 id="canvas1"></canvas>
-    <button>Increase Ball Speed</button>
+
     <script>
       var canvas = document.querySelector("#canvas1");
-
-      var ctx = canvas.getContext("2d");
-      var player = canvas.getContext("2d");
+      var background = new Image();
+      background.src = "https://i.pinimg.com/564x/1c/20/4e/1c204ec5a85f0cb6a86f901c29a4ae17.jpg";
       var stats = canvas.getContext("2d");
+      var player = canvas.getContext("2d");
+      var ctx = canvas.getContext("2d");
+      var cty = canvas.getContext("2d");
       
       var ballRadius = 10;
-      var x = 10;
-      var y = 10;
-      var dx = 2;
-      var dy = -2;
+      let x = 10;
+      let y = 33;
+      let xb = 380;
+      let yb = 100;
+      let xw = 390;
+      let yw = 300;
+      let s = 1;
+      let numL1 = 1;
+      let numS = 0;
+      let numL2 = 3;
+      let press = true;
+      let hit1 = false;
+      let hit2 = true;
+
+      stats.font = "12px Arial";
+      stats.strokeText("Welcome!", 10, 50);
+      stats.strokeText("You are the blue player, press the arrow keys to move around.", 10, 70);
+      stats.strokeText("Avoid the red objects to gain 5 points.", 10, 90);
+      stats.strokeText("Touch the green objects to gain 10 points.", 10, 110);
+      stats.strokeText("Try to get to 100 points.", 10, 130);
+      stats.strokeText("Press 's' to start the game.", 10, 150);
 
       function drawBall() {
+        player.drawImage(background, 0, 0);
         player.beginPath();
-        player.arc(10, 10, ballRadius, 0, Math.PI*2);
-        player.fillStyle = "#ff0000";
+        player.arc(x, y, ballRadius, 0, Math.PI*2);
+        player.fillStyle = "#0095DD";
         player.fill();
         player.closePath();
+        
         ctx.beginPath();
-        ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-        ctx.fillStyle = "#0095DD";
+        ctx.arc(xb, yb, ballRadius, 0, Math.PI*2);
+        ctx.fillStyle = "#ff0000";
         ctx.fill();
         ctx.closePath();
+        if (xb - s < 0) {
+          xb = 0;
+        }
+        else {
+          xb -= s;
+        }
+        
+        cty.beginPath();
+        cty.arc(xw, yw, ballRadius, 0, Math.PI*2);
+        cty.fillStyle = "#38a32a";
+        cty.fill();
+        cty.closePath();
+        xw--;
 
         stats.font="15px Arial";
-        stats.fillStyle = "black"
-        stats.fillText("Level:", 20, 20);
-        stats.fillText("Score:", 70, 20);
-        stats.fillText("Lives:", 120, 20);
-        
-      }
-      function draw() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          drawBall();
-          
-          if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
-              dx = -dx;
-          }
-          if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) {
-              dy = -dy;
-          }
-          
-          x += dx;
-          y += dy;
-         
-        window.requestAnimationFrame(draw);
+        stats.fillStyle = "black";
+        stats.fillText("Level:", 20, 15);
+        stats.fillText(numL1, 70, 15);
+        stats.fillText("Score:", 120, 15);
+        stats.fillText(numS, 170, 15);
+        stats.fillText("Lives:", 220, 15);
+        stats.fillText(numL2, 270, 15);
+
+        stats.moveTo(0, 22);
+        stats.lineTo(400, 22);
+        stats.stroke();
       }
 
-      draw()
-      const btn = document.querySelector('button');
-      btn.addEventListener('click', () => {
-       setInterval(draw(), 10);
-      });
+      function impact() {
+        var dx = (x + 10) - (xb + 10);
+        var dy = (y + 10) - (yb + 10);
+        var dist = Math.sqrt((dx * dx) + (dy * dy));
+
+        if (dist < 20) {
+          hit1 = true;
+        }
+        else {
+          hit1 = false;
+        }
+      }
+      
+      function levelUp() {
+        if (numS >= 25 && numS < 50) {
+          numL1 = 2;
+          s = 2;
+        }
+        else if (numS >= 50 && numS < 75) {
+          numL1 = 3;
+          s = 3;
+        }
+        else if (numS >= 75 && numS < 100) {
+          numL1 = 4;
+          s = 4;
+        }
+      }
+
+      function arrowInput(keydown) {
+        if (keydown.key == 'ArrowUp' && y > 32) {
+          y -= 2;
+        }
+        if (keydown.key == 'ArrowDown' && y < 390) {
+          y += 2;
+        }
+        if (keydown.key == 'ArrowLeft' && x > 10) {
+          x -= 2;
+        }
+        if (keydown.key == 'ArrowRight' && x < 390) {
+          x += 2;
+        }
+        if (keydown.key == 'p') {
+          
+        }
+      }
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key == 's' && press) {
+          function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stats.clearRect(0, 0, canvas.width, canvas.height);
+            player.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            window.addEventListener('keydown', arrowInput);
+            
+            impact();
+            if (hit1 && hit2) {
+              numL2--;
+              hit2 = false;
+            }
+            if (xb == 0) {
+              console.log(hit2)
+              if (hit2) {
+                numS += 5;
+              }
+              hit2 = true;
+              xb = 400;
+              yb = Math.floor(Math.random()*390 + 33);
+            }
+            if (xw == 0) {
+              xw = 400;
+              yw = Math.floor(Math.random()*390 + 33);
+            }
+            levelUp();
+            
+            if (numL2 == 0) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              stats.clearRect(0, 0, canvas.width, canvas.height);
+              player.clearRect(0, 0, canvas.width, canvas.height);
+              stats.font = "25px Arial";
+              stats.strokeText("Game Over", 10, 50);
+            }
+            else if (numS == 100) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              stats.clearRect(0, 0, canvas.width, canvas.height);
+              player.clearRect(0, 0, canvas.width, canvas.height);
+              stats.font = "25px Arial";
+              stats.strokeText("You Win! Congrats!", 10, 50);
+            }
+            else {
+              window.requestAnimationFrame(draw);
+            }
+          }
+          if (numL2 > 0) {
+            draw();
+          }
+        }
+      })
     </script>
   </body>
 </html>
