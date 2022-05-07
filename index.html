@@ -38,8 +38,10 @@
       let numS = 0;
       let numL2 = 3;
       let press = true;
-      let hit1 = false;
-      let hit2 = true;
+      let hitO1 = false;
+      let hitO2 = true;
+      let hitB1 = false;
+      let hitB2 = true;
 
       stats.font = "12px Arial";
       stats.strokeText("Welcome!", 10, 50);
@@ -90,16 +92,28 @@
         stats.stroke();
       }
 
-      function impact() {
+      function impactObstacle() {
         var dx = (x + 10) - (xb + 10);
         var dy = (y + 10) - (yb + 10);
         var dist = Math.sqrt((dx * dx) + (dy * dy));
 
         if (dist < 20) {
-          hit1 = true;
+          hitO1 = true;
         }
         else {
-          hit1 = false;
+          hitO1 = false;
+        }
+      }
+      function impactBenefit() {
+        var dx = (x + 10) - (xw + 10);
+        var dy = (y + 10) - (yw + 10);
+        var dist = Math.sqrt((dx * dx) + (dy * dy));
+
+        if (dist < 20) {
+          hitB1 = true;
+        }
+        else {
+          hitB1 = false;
         }
       }
       
@@ -145,24 +159,33 @@
             drawBall();
             window.addEventListener('keydown', arrowInput);
             
-            impact();
-            if (hit1 && hit2) {
+            impactObstacle();
+            impactBenefit();
+            if (hitO1 && hitO2) {
               numL2--;
-              hit2 = false;
+              hitO2 = false;
             }
             if (xb == 0) {
-              console.log(hit2)
-              if (hit2) {
+              if (hitO2) {
                 numS += 5;
               }
-              hit2 = true;
+              hitO2 = true;
               xb = 400;
               yb = Math.floor(Math.random()*390 + 33);
             }
+            if (hitB1 && hitB2) {
+              hitB2 = false;
+            }
             if (xw == 0) {
               xw = 400;
+              console.log(hitB2)
+              if (!hitB2) {
+                numS += 10;
+              }
+              hitB2 = true;
               yw = Math.floor(Math.random()*390 + 33);
             }
+            
             levelUp();
             
             if (numL2 == 0) {
